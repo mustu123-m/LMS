@@ -70,7 +70,7 @@ export default function CollectionDashboard() {
         ) : (
           <div className="space-y-4">
             {applications.map((app) => {
-              const outstanding = (app.totalRepayment || 0) - app.totalPaid;
+              const outstanding = Math.round(((app.totalRepayment || 0) - app.totalPaid) * 100) / 100;
               const form = getForm(app._id);
               const isDisbursed = app.status === 'disbursed';
 

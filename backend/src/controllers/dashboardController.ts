@@ -137,7 +137,7 @@ export const recordPayment = async (req: AuthRequest, res: Response): Promise<vo
   }
 
   const paymentAmount = Number(amount);
-  const outstanding = (application.totalRepayment || 0) - application.totalPaid;
+  const outstanding = Math.round(((application.totalRepayment || 0) - application.totalPaid) * 100) / 100;
 
   if (paymentAmount <= 0) {
     res.status(400).json({ success: false, message: 'Payment amount must be greater than 0' });
@@ -167,10 +167,10 @@ export const recordPayment = async (req: AuthRequest, res: Response): Promise<vo
     recordedBy: req.user!.id,
   });
 
-  application.totalPaid += paymentAmount;
+  application.totalPaid = Math.round((application.totalPaid + paymentAmount) * 100) / 100;
 
-  // Auto-close if fully paid
-  if (application.totalPaid >= (application.totalRepayment || 0)) {
+  // Auto-close if fully paid (use small epsilon to handle floating point)
+  if (application.totalPaid >= (application.totalRepayment || 0) - 0.01) {
     application.status = 'closed';
     application.closedAt = new Date();
   }
